@@ -134,6 +134,7 @@ F 10008 IBM 3 102.00000
 #include <fstream>
 #include <iostream>
 #include <list>
+#include <sstream>
 
 typedef std::list<std::string> results_t;
 
@@ -141,6 +142,15 @@ class SimpleCross
 {
 public:
     results_t action(const std::string& line) { return(results_t()); }
+    results_t split(const std::string& line, const char& delimiter){
+      std::string temp_holder;
+      std::stringstream ss(line);
+      results_t string_array;
+      while (getline(ss, temp_holder, delimiter)){
+        string_array.push_back(temp_holder);
+      }
+      return string_array;
+    }
 };
 
 int main(int argc, char **argv)
