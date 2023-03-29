@@ -137,7 +137,7 @@ F 10008 IBM 3 102.00000
 #include <sstream>
 #include <map>
 #include <vector>
-#include <unordered_set>
+#include <unordered_map>
 
 typedef std::list<std::string> results_t;
 typedef std::vector<std::string> vlist_t;
@@ -159,12 +159,11 @@ public:
       results_t output, print_book;
       vlist_t split_line = this->split(line, ' ');
       int order_id;
-      std::pair<std::unordered_set<int>::iterator,bool> insrt;
       switch (split_line[ACTION][0]){
         case 'O':
           order_id = std::stoi(split_line[OID]);
-          insrt = OIDs.insert(order_id);
-          if(insrt.second) {
+          if (OIDs.find(order_id) == OIDs.end()){
+            OIDs[order_id] = line;
             output = this->cross_order(line);
           } else {
             error_symbol = 'E';
@@ -399,7 +398,7 @@ private:
     book_t buy_book;
     book_t sell_book;
     std::string error_symbol;
-    std::unordered_set<int> OIDs;
+    std::unordered_map<int, std::string> OIDs;
 };
 
 int main(int argc, char **argv)
