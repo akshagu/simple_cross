@@ -169,7 +169,14 @@ public:
     }
 
     void process_order (const vlist_t& split_line){
-      this->add_to_book(split_line, buy_book);
+      switch (split_line[SIDE][0]){
+        case 'B':
+          this->add_to_book(split_line, buy_book);
+          break;
+        case 'S':
+          this->add_to_book(split_line, sell_book);
+          break;
+      }
       auto it = buy_book.begin();
       std::cout << it->first << std::endl;
     }
