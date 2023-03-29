@@ -141,7 +141,8 @@ F 10008 IBM 3 102.00000
 
 typedef std::list<std::string> results_t;
 typedef std::vector<std::string> vlist_t;
-typedef std::map<double, std::map<int, std::string> > book_t;
+typedef std::map<double, std::map<int, std::string> > sub_book_t;
+typedef std::map<std::string, std::pair<sub_book_t, sub_book_t> > book_t;
 
 enum Inputs {
   ACTION = 0, 
@@ -211,7 +212,7 @@ public:
       vlist_t split_line = this->split(line, ' ');
       std::string fulfilled_symbol;
       fulfilled_symbol = 'F';
-      book_t::const_iterator sell_iterator = sell_book.begin();
+      sub_book_t::const_iterator sell_iterator = sell_book.begin();
       std::map<int, std::string> orders;
       double price = std::stod(split_line[PX]);
       int buy_quantity = std::stoi(split_line[QTY]);
@@ -259,7 +260,7 @@ public:
       vlist_t split_line = this->split(line, ' ');
       std::string fulfilled_symbol;
       fulfilled_symbol = 'F';
-      book_t::const_reverse_iterator buy_iterator = buy_book.rbegin();
+      sub_book_t::const_reverse_iterator buy_iterator = buy_book.rbegin();
       std::map<int, std::string> orders;
       double price = std::stod(split_line[PX]);
       int sell_quantity = std::stoi(split_line[QTY]);
@@ -302,7 +303,7 @@ public:
       return fulfilled;
     }
     
-    void add_to_book (const std::string& line, book_t& book){
+    void add_to_book (const std::string& line, sub_book_t& book){
       vlist_t split_line = this->split(line, ' ');
       double price = std::stod(split_line[PX]);
       int order_id = std::stoi(split_line[OID]);
@@ -317,24 +318,24 @@ public:
       }
     }
 
-    void delete_from_book (const std::string& line, book_t& book){
+    void delete_from_book (const std::string& line, sub_book_t& book){
       vlist_t split_line = this->split(line, ' ');
       int order_id = std::stoi(split_line[OID]);
       std::map<int, std::string> orders;
       // add error if oid not found
-      for (book_t::const_iterator i = book.begin(); i != book.end(); i++){
+      for (sub_book_t::const_iterator i = book.begin(); i != book.end(); i++){
         orders = i->second;
         orders.erase(order_id);
         book[i->first] = orders;
       }
     }
 
-    void update_in_book (const std::string& line, book_t& book){
+    void update_in_book (const std::string& line, sub_book_t& book){
       vlist_t split_line = this->split(line, ' ');
       int order_id = std::stoi(split_line[OID]);
       std::map<int, std::string> orders;
       // add error if oid not found
-      for (book_t::const_iterator i = book.begin(); i != book.end(); i++){
+      for (sub_book_t::const_iterator i = book.begin(); i != book.end(); i++){
         orders = i->second;
         orders[order_id] = line;
         book[i->first] = orders;
@@ -342,8 +343,8 @@ public:
     }
 
     results_t print_all_sorted (){
-      book_t::const_iterator buy_iterator = buy_book.begin();
-      book_t::const_iterator sell_iterator = sell_book.begin();
+      sub_book_t::const_iterator buy_iterator = buy_book.begin();
+      sub_book_t::const_iterator sell_iterator = sell_book.begin();
       results_t all_sorted;
       std::map<int, std::string> orders;
       while (buy_iterator != buy_book.end() && sell_iterator != sell_book.end()){
@@ -395,8 +396,8 @@ public:
       return line;
     }
 private:
-    book_t buy_book;
-    book_t sell_book;
+    sub_book_t buy_book;
+    sub_book_t sell_book;
     std::string error_symbol;
     std::unordered_map<int, std::string> OIDs;
 };
