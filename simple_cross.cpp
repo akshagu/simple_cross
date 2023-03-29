@@ -213,6 +213,18 @@ public:
       }
     }
 
+    void update_in_book (const std::string& line, book_t& book){
+      vlist_t split_line = this->split(line, ' ');
+      int order_id = std::stoi(split_line[OID]);
+      std::map<int, std::string> orders;
+      // add error if oid not found
+      for (book_t::const_iterator i = book.begin(); i != book.end(); i++){
+        orders = i->second;
+        orders[order_id] = line;
+        book[i->first] = orders;
+      }
+    }
+
     results_t print_all_sorted (){
       book_t::const_iterator buy_iterator = buy_book.begin();
       book_t::const_iterator sell_iterator = sell_book.begin();
