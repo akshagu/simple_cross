@@ -194,7 +194,6 @@ public:
 
     results_t buy_cross(const std::string& line){
       results_t fulfilled;
-      vlist_t fulfilled_order;
       vlist_t split_line = this->split(line, ' ');
       std::string fulfilled_symbol;
       fulfilled_symbol = 'F';
@@ -242,7 +241,10 @@ public:
     }
 
     results_t sell_cross(const std::string& line){
+      results_t fulfilled;
       vlist_t split_line = this->split(line, ' ');
+      std::string fulfilled_symbol;
+      fulfilled_symbol = 'F';
       book_t::const_reverse_iterator buy_iterator = buy_book.rbegin();
       std::map<int, std::string> orders;
       double price = std::stod(split_line[PX]);
@@ -260,14 +262,20 @@ public:
             split_order[QTY] = std::to_string(buy_quantity);
             order = this->merge(split_order, ' ');
             update_in_book(order, buy_book);
+            fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_line[PX]);
+            fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_line[PX]);
             break;
           } else if (sell_quantity==buy_quantity) {
             sell_quantity = 0;
             this->delete_from_book(order,buy_book);
+            fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_line[PX]);
+            fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_line[PX]);
             break;
           } else {
             sell_quantity = sell_quantity - buy_quantity;
             this->delete_from_book(order,buy_book);
+            fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_order[QTY]+" "+split_line[PX]);
+            fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_order[QTY]+" "+split_line[PX]);
           }
         }
         buy_iterator++;
@@ -277,7 +285,7 @@ public:
         std::string new_line = this->merge(split_line, ' ');
         this->add_to_book(new_line, sell_book);
         }
-      return results_t();
+      return fulfilled;
     }
 
     void process_order (const std::string& line){
