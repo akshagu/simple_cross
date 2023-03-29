@@ -135,6 +135,7 @@ F 10008 IBM 3 102.00000
 #include <iostream>
 #include <list>
 #include <sstream>
+#include <map>
 
 typedef std::list<std::string> results_t;
 
@@ -142,7 +143,22 @@ class SimpleCross
 {
 public:
     results_t action(const std::string& line) { return(results_t()); }
-    results_t split(const std::string& line, const char& delimiter){
+    
+    void add_to_book (const std::string& line, std::map<double, results_t>& book){
+      results_t temp = this->split(line, ' ');
+      results_t::const_iterator it = temp.begin();
+      std::advance(it,5);
+      double price = std::stod(*it);
+      if (book.find(price) == book.end()){
+        results_t order_list;
+        order_list.push_back(line);
+        book[price] = order_list;
+      } else {
+        book[price].push_back(line);
+      }
+    }
+
+    results_t split(std::string line, char delimiter){
       std::string temp_holder;
       std::stringstream ss(line);
       results_t string_array;
@@ -151,6 +167,8 @@ public:
       }
       return string_array;
     }
+private:
+    std::map<double, results_t> buy_book;
 };
 
 int main(int argc, char **argv)
