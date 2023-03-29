@@ -183,7 +183,7 @@ public:
     
     void add_to_book (const vlist_t& split_line, book_t& book){
       double price = std::stod(split_line[PX]);
-      double order_id = std::stoi(split_line[OID]);
+      int order_id = std::stoi(split_line[OID]);
       if (book.find(price) == book.end()){
         std::map<int, vlist_t> orders;
         orders[order_id] = split_line;
