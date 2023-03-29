@@ -258,6 +258,14 @@ public:
       }
       return string_array;
     }
+
+    std::string merge(const vlist_t& split_line, char delimiter){
+      std::string line;
+      for (std::string chunk : split_line){
+        line = line + chunk + delimiter;
+      }
+      return line;
+    }
 private:
     book_t buy_book;
     book_t sell_book;
