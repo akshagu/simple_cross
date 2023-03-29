@@ -177,6 +177,19 @@ public:
       }
       return output;
     }
+
+    results_t cross_order (const std::string& line){
+      vlist_t split_line = this->split(line, ' ');
+      results_t buy_sell_result;
+      switch (split_line[SIDE][0]){
+        case 'B':
+          buy_sell_result = this->buy_cross(line);
+          break;
+        case 'S':
+          buy_sell_result = this->sell_cross(line);
+          break;
+      }
+      return buy_sell_result;
     }
 
     results_t buy_cross(const std::string& line){
