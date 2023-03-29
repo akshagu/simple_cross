@@ -177,7 +177,7 @@ public:
           sub_book = book_main.begin();
           while(sub_book != book_main.end()){
             book_pair = sub_book->second;
-            print_book = this->print_all_sorted(book_pair.first,book_pair.second);
+            print_book = this->print_book_pair(book_pair.first,book_pair.second);
             for (std::string& order : print_book) {
               order[0] = 'P';
               output.push_back(order);
@@ -398,7 +398,7 @@ public:
       }
     }
 
-    results_t print_all_sorted (sub_book_t buy_book, sub_book_t sell_book){
+    results_t print_book_pair (sub_book_t buy_book, sub_book_t sell_book){
       sub_book_t::const_iterator buy_iterator = buy_book.begin();
       sub_book_t::const_iterator sell_iterator = sell_book.begin();
       results_t all_sorted;
