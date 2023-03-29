@@ -67,4 +67,7 @@ Design Choices:<br/><br/>
 	The design choices were all geared towards increasing effeciency of crossing events. For this reason the following data structures and algorithms were chosen: <br/><br/>
 		The data was divided into two structures to increase speed for accessing price ordered list and also for deleting orders quickly. <br/><br/>
 		There is an overarching unordered map structure that uses the symbol as the key. Under this are two more oredred maps (chosen for its self sorting/balancing behavior) that represent a buy and a sell book for each symbol (ticker). Each of these is ordered internally based on price to quickly access lowest prices for crossing. <br/><br/>
-		Another unordered map is maintained to quickly associate order ID and the location of the order in the main nest map. This helps in quickly detecting duplicates and deleting entries.
+		Another unordered map is maintained to quickly associate order ID and the location of the order in the main nest map. This helps in quickly detecting duplicates and deleting entries.<br/><br/>
+
+Running instruction:<br/><br/>
+	Navigate to the folder then do "make all" and then "./simple_cross". Make sure the actions.txt file is within the same folder.
