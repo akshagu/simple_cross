@@ -140,7 +140,7 @@ F 10008 IBM 3 102.00000
 
 typedef std::list<std::string> results_t;
 typedef std::vector<std::string> vlist_t;
-typedef std::map<double, std::map<int, vlist_t> > book_t;
+typedef std::map<double, std::map<int, std::string> > book_t;
 
 enum Inputs {
   ACTION = 0, 
@@ -158,48 +158,52 @@ public:
       vlist_t split_line = this->split(line, ' ');
       switch (split_line[ACTION][0]){
         case 'O':
-          this->process_order(split_line);
+          this->process_order(line);
           break;
         case 'P':
           break;
         case 'X':
-          this->delete_from_book(split_line, buy_book);
-          this->delete_from_book(split_line, sell_book);
+          this->delete_from_book(line, buy_book);
+          this->delete_from_book(line, sell_book);
           break;
       }
       return results_t();
     }
 
-    void process_order (const vlist_t& split_line){
+    void process_order (const std::string& line){
+      vlist_t split_line = this->split(line, ' ');
       switch (split_line[SIDE][0]){
         case 'B':
-          this->add_to_book(split_line, buy_book);
+          this->add_to_book(line, buy_book);
           break;
         case 'S':
-          this->add_to_book(split_line, sell_book);
+          this->add_to_book(line, sell_book);
           break;
       }
-      auto it = buy_book.begin();
-      std::cout << it->first << std::endl;
+      auto it = sell_book.begin();
+      std::cout << sell_book.size() << " " << it->first << std::endl;
     }
     
-    void add_to_book (const vlist_t& split_line, book_t& book){
+    void add_to_book (const std::string& line, book_t& book){
+      vlist_t split_line = this->split(line, ' ');
       double price = std::stod(split_line[PX]);
       int order_id = std::stoi(split_line[OID]);
+      //add duplicate error handling
       if (book.find(price) == book.end()){
-        std::map<int, vlist_t> orders;
-        orders[order_id] = split_line;
+        std::map<int, std::string> orders;
+        orders[order_id] = line;
         book[price] = orders;
       } else {
-        std::map<int, vlist_t> orders = book[price];
-        orders[order_id] = split_line;
+        std::map<int, std::string> orders = book[price];
+        orders[order_id] = line;
         book[price] = orders;
       }
     }
 
-    void delete_from_book (const vlist_t& split_line, book_t& book){
+    void delete_from_book (const std::string& line, book_t& book){
+      vlist_t split_line = this->split(line, ' ');
       int order_id = std::stoi(split_line[OID]);
-      std::map<int, vlist_t> orders;
+      std::map<int, std::string> orders;
       // add error if oid not found
       for (book_t::const_iterator i = book.begin(); i != book.end(); i++){
         orders = i->second;
