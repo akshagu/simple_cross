@@ -212,6 +212,44 @@ public:
       }
     }
 
+    results_t print_all_sorted (){
+      book_t::const_iterator buy_iterator = buy_book.begin();
+      book_t::const_iterator sell_iterator = sell_book.begin();
+      results_t all_sorted;
+      std::map<int, std::string> orders;
+      while (buy_iterator != buy_book.end() && sell_iterator != sell_book.end()){
+        if(buy_iterator->first<=sell_iterator->first){
+          orders = buy_iterator->second;
+          for (std::map<int, std::string>::const_iterator order_iterator = orders.begin(); order_iterator != orders.end(); order_iterator++){
+            all_sorted.push_back(order_iterator->second);
+          }
+          buy_iterator++;
+        } else {
+          orders = sell_iterator->second;
+          for (std::map<int, std::string>::const_iterator order_iterator = orders.begin(); order_iterator != orders.end(); order_iterator++){
+            all_sorted.push_back(order_iterator->second);
+          }
+          sell_iterator++;
+        }
+      }
+      while (buy_iterator != buy_book.end()){
+        orders = buy_iterator->second;
+        for (std::map<int, std::string>::const_iterator order_iterator = orders.begin(); order_iterator != orders.end(); order_iterator++){
+          all_sorted.push_back(order_iterator->second);
+        }
+        buy_iterator++;
+      }
+      while (sell_iterator != sell_book.end()){
+        orders = sell_iterator->second;
+        for (std::map<int, std::string>::const_iterator order_iterator = orders.begin(); order_iterator != orders.end(); order_iterator++){
+          all_sorted.push_back(order_iterator->second);
+        }
+        sell_iterator++;
+      }
+      all_sorted.reverse();
+      return all_sorted;
+    }
+
     vlist_t split(std::string line, char delimiter){
       std::string temp_holder;
       std::stringstream ss(line);
