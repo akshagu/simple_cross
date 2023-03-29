@@ -221,34 +221,32 @@ public:
       while (buy_iterator != buy_book.end() && sell_iterator != sell_book.end()){
         if(buy_iterator->first<=sell_iterator->first){
           orders = buy_iterator->second;
-          for (std::map<int, std::string>::const_iterator order_iterator = orders.begin(); order_iterator != orders.end(); order_iterator++){
-            all_sorted.push_back(order_iterator->second);
-          }
+          append_orders_for_key(orders, all_sorted);
           buy_iterator++;
         } else {
           orders = sell_iterator->second;
-          for (std::map<int, std::string>::const_iterator order_iterator = orders.begin(); order_iterator != orders.end(); order_iterator++){
-            all_sorted.push_back(order_iterator->second);
-          }
+          append_orders_for_key(orders, all_sorted);
           sell_iterator++;
         }
       }
       while (buy_iterator != buy_book.end()){
         orders = buy_iterator->second;
-        for (std::map<int, std::string>::const_iterator order_iterator = orders.begin(); order_iterator != orders.end(); order_iterator++){
-          all_sorted.push_back(order_iterator->second);
-        }
+        append_orders_for_key(orders, all_sorted);
         buy_iterator++;
       }
       while (sell_iterator != sell_book.end()){
         orders = sell_iterator->second;
-        for (std::map<int, std::string>::const_iterator order_iterator = orders.begin(); order_iterator != orders.end(); order_iterator++){
-          all_sorted.push_back(order_iterator->second);
-        }
+        append_orders_for_key(orders, all_sorted);
         sell_iterator++;
       }
       all_sorted.reverse();
       return all_sorted;
+    }
+
+    void append_orders_for_key (std::map<int, std::string>& orders, results_t& order_list){
+      for (std::map<int, std::string>::const_iterator order_iterator = orders.begin(); order_iterator != orders.end(); order_iterator++){
+        order_list.push_back(order_iterator->second);
+      }
     }
 
     vlist_t split(std::string line, char delimiter){
