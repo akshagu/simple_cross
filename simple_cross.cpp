@@ -173,6 +173,9 @@ public:
           this->delete_from_book(line, sell_book);
           output.push_back(line);
           break;
+        default:
+          error_symbol = 'E';
+          output.push_back(error_symbol+" "+"Incorrect action character");
       }
       return output;
     }
@@ -187,6 +190,9 @@ public:
         case 'S':
           buy_sell_result = this->sell_cross(line);
           break;
+        default:
+          error_symbol = 'E';
+          buy_sell_result.push_back(error_symbol+" "+"Incorrect side character");
       }
       return buy_sell_result;
     }
@@ -382,6 +388,7 @@ public:
 private:
     book_t buy_book;
     book_t sell_book;
+    std::string error_symbol;
 };
 
 int main(int argc, char **argv)
