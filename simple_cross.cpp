@@ -180,8 +180,6 @@ public:
           this->add_to_book(line, sell_book);
           break;
       }
-      auto it = sell_book.begin();
-      std::cout << sell_book.size() << " " << it->first << std::endl;
     }
     
     void add_to_book (const std::string& line, book_t& book){
