@@ -140,16 +140,16 @@ F 10008 IBM 3 102.00000
 
 typedef std::list<std::string> results_t;
 typedef std::vector<std::string> vlist_t;
-typedef std::map<double, std::map<int, std::string> > book_t;
+typedef std::map<double, std::map<int, vlist_t> > book_t;
 
 class SimpleCross
 {
 public:
     results_t action(const std::string& line) {
-      vlist_t parsed_order = this->split(line, ' ');
-      switch (parsed_order[0][0]){
+      vlist_t split_line = this->split(line, ' ');
+      switch (split_line[0][0]){
         case 'O':
-          this->process_order(line);
+          this->process_order(split_line);
           break;
         case 'P':
           break;
@@ -159,23 +159,22 @@ public:
       return results_t();
     }
 
-    void process_order (const std::string& line){
-      this->add_to_book(line, buy_book);
+    void process_order (const vlist_t& split_line){
+      this->add_to_book(split_line, buy_book);
       auto it = buy_book.begin();
       std::cout << it->first << std::endl;
     }
     
-    void add_to_book (const std::string& line, book_t& book){
-      vlist_t parsed_order = this->split(line, ' ');
-      double price = std::stod(parsed_order[5]);
-      double OID = std::stoi(parsed_order[1]);
+    void add_to_book (const vlist_t& split_line, book_t& book){
+      double price = std::stod(split_line[5]);
+      double OID = std::stoi(split_line[1]);
       if (book.find(price) == book.end()){
-        std::map<int, std::string> orders;
-        orders[OID] = line;
+        std::map<int, vlist_t> orders;
+        orders[OID] = split_line;
         book[price] = orders;
       } else {
-        std::map<int, std::string> orders = book[price];
-        orders[OID] = line;
+        std::map<int, vlist_t> orders = book[price];
+        orders[OID] = split_line;
         book[price] = orders;
       }
     }
