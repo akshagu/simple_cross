@@ -158,7 +158,10 @@ class SimpleCross
 public:
     results_t action(const std::string& line) {
       results_t output, print_book;
+      std::pair<bool, results_t> err_check;
       vlist_t split_line = this->split(line, ' ');
+      err_check = check_malformed_input(split_line);
+      if (!err_check.first){
       book_t::const_iterator sub_book;
       std::pair<sub_book_t, sub_book_t> book_pair;
       int order_id;
@@ -193,7 +196,21 @@ public:
           error_symbol = 'E';
           output.push_back(error_symbol+" "+"Incorrect action character");
       }
+      } else {
+        output = err_check.second;
+      }
       return output;
+    }
+
+    std::pair<bool, results_t> check_malformed_input (const vlist_t& split_line) {
+      results_t output;
+      bool error_flag = false;
+      if (split_line[ACTION].length()>1) {
+        error_symbol = 'E';
+        error_flag = true;
+        output.push_back(error_symbol+" "+"Malformed action input");
+      }
+      return std::make_pair(error_flag, output);
     }
 
     results_t cross_order (const std::string& line){
