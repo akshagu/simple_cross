@@ -187,8 +187,8 @@ public:
           vlist_t split_order = this->split(order, ' ');
           int sell_quantity = std::stoi(split_order[QTY]);
           if (sell_quantity>buy_quantity){
-            buy_quantity = 0;
             sell_quantity = sell_quantity - buy_quantity;
+            buy_quantity = 0;
             split_order[QTY] = std::to_string(sell_quantity);
             order = this->merge(split_order, ' ');
             update_in_book(order, sell_book);
@@ -226,8 +226,8 @@ public:
           vlist_t split_order = this->split(order, ' ');
           int buy_quantity = std::stoi(split_order[QTY]);
           if (buy_quantity>sell_quantity){
-            sell_quantity = 0;
             buy_quantity = buy_quantity - sell_quantity;
+            sell_quantity = 0;
             split_order[QTY] = std::to_string(buy_quantity);
             order = this->merge(split_order, ' ');
             update_in_book(order, buy_book);
