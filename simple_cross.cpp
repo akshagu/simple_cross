@@ -142,12 +142,21 @@ typedef std::list<std::string> results_t;
 typedef std::vector<std::string> vlist_t;
 typedef std::map<double, std::map<int, vlist_t> > book_t;
 
+enum Inputs {
+  ACTION = 0, 
+  OID = 1,
+  SYMBOL = 2, 
+  SIDE = 3,
+  QTY = 4,
+  PX = 5
+};
+
 class SimpleCross
 {
 public:
     results_t action(const std::string& line) {
       vlist_t split_line = this->split(line, ' ');
-      switch (split_line[0][0]){
+      switch (split_line[ACTION][0]){
         case 'O':
           this->process_order(split_line);
           break;
@@ -166,15 +175,15 @@ public:
     }
     
     void add_to_book (const vlist_t& split_line, book_t& book){
-      double price = std::stod(split_line[5]);
-      double OID = std::stoi(split_line[1]);
+      double price = std::stod(split_line[PX]);
+      double order_id = std::stoi(split_line[OID]);
       if (book.find(price) == book.end()){
         std::map<int, vlist_t> orders;
-        orders[OID] = split_line;
+        orders[order_id] = split_line;
         book[price] = orders;
       } else {
         std::map<int, vlist_t> orders = book[price];
-        orders[OID] = split_line;
+        orders[order_id] = split_line;
         book[price] = orders;
       }
     }
