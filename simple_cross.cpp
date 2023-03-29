@@ -155,7 +155,7 @@ class SimpleCross
 {
 public:
     results_t action(const std::string& line) {
-      results_t print_book;
+      results_t output, print_book;
       vlist_t split_line = this->split(line, ' ');
       //handle error here
       switch (split_line[ACTION][0]){
@@ -164,13 +164,19 @@ public:
           break;
         case 'P':
           print_book = this->print_all_sorted();
+          for (std::string& order : print_book) {
+            order[0] = 'P';
+            output.push_back(order);
+          }
           break;
         case 'X':
           this->delete_from_book(line, buy_book);
           this->delete_from_book(line, sell_book);
+          output.push_back(line);
           break;
       }
-      return this->print_all_sorted();
+      return output;
+    }
     }
 
     results_t buy_cross(const std::string& line){
