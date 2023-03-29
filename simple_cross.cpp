@@ -140,6 +140,7 @@ F 10008 IBM 3 102.00000
 
 typedef std::list<std::string> results_t;
 typedef std::vector<std::string> vlist_t;
+typedef std::map<double, std::map<int, std::string> > book_t;
 
 class SimpleCross
 {
@@ -151,11 +152,13 @@ public:
       double price = std::stod(parsed_order[5]);
       double OID = std::stoi(parsed_order[1]);
       if (book.find(price) == book.end()){
-        results_t order_list;
-        order_list.push_back(line);
-        book[price] = order_list;
+        std::map<int, std::string> orders;
+        orders[OID] = line;
+        book[price] = orders;
       } else {
-        book[price].push_back(line);
+        std::map<int, std::string> orders = book[price];
+        orders[OID] = line;
+        book[price] = orders;
       }
     }
 
@@ -169,7 +172,8 @@ public:
       return string_array;
     }
 private:
-    std::map<double, results_t> buy_book;
+    book_t buy_book;
+    book_t sell_book;
 };
 
 int main(int argc, char **argv)
