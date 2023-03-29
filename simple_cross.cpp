@@ -142,7 +142,7 @@ F 10008 IBM 3 102.00000
 typedef std::list<std::string> results_t;
 typedef std::vector<std::string> vlist_t;
 typedef std::map<double, std::map<int, std::string> > sub_book_t;
-typedef std::map<std::string, std::pair<sub_book_t, sub_book_t> > book_t;
+typedef std::unordered_map<std::string, std::pair<sub_book_t, sub_book_t> > book_t;
 
 enum Inputs {
   ACTION = 0, 
@@ -159,6 +159,8 @@ public:
     results_t action(const std::string& line) {
       results_t output, print_book;
       vlist_t split_line = this->split(line, ' ');
+      book_t::const_iterator sub_book;
+      std::pair<sub_book_t, sub_book_t> book_pair;
       int order_id;
       switch (split_line[ACTION][0]){
         case 'O':
@@ -172,15 +174,19 @@ public:
           }
           break;
         case 'P':
-          print_book = this->print_all_sorted();
-          for (std::string& order : print_book) {
-            order[0] = 'P';
-            output.push_back(order);
+          sub_book = book_main.begin();
+          while(sub_book != book_main.end()){
+            book_pair = sub_book->second;
+            print_book = this->print_all_sorted(book_pair.first,book_pair.second);
+            for (std::string& order : print_book) {
+              order[0] = 'P';
+              output.push_back(order);
+            }
+            sub_book++;
           }
           break;
         case 'X':
-          this->delete_from_book(line, buy_book);
-          this->delete_from_book(line, sell_book);
+          this->delete_from_book(line, book_main);
           output.push_back(line);
           break;
         default:
@@ -212,6 +218,7 @@ public:
       vlist_t split_line = this->split(line, ' ');
       std::string fulfilled_symbol;
       fulfilled_symbol = 'F';
+      sub_book_t sell_book = book_main[split_line[SYMBOL]].second;
       sub_book_t::const_iterator sell_iterator = sell_book.begin();
       std::map<int, std::string> orders;
       double price = std::stod(split_line[PX]);
@@ -228,19 +235,19 @@ public:
             buy_quantity = 0;
             split_order[QTY] = std::to_string(sell_quantity);
             order = this->merge(split_order, ' ');
-            update_in_book(order, sell_book);
+            update_in_book(order, book_main);
             fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_order[PX]);
             fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_order[PX]);
             break;
           } else if (sell_quantity==buy_quantity) {
             buy_quantity = 0;
-            this->delete_from_book(order,sell_book);
+            this->delete_from_book(order,book_main);
             fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_order[PX]);
             fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_order[PX]);
             break;
           } else {
             buy_quantity = buy_quantity - sell_quantity;
-            this->delete_from_book(order,sell_book);
+            this->delete_from_book(order,book_main);
             fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_order[QTY]+" "+split_order[PX]);
             fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_order[QTY]+" "+split_order[PX]);
           }
@@ -250,7 +257,7 @@ public:
       if (buy_quantity) {
         split_line[QTY] = std::to_string(buy_quantity);
         std::string new_line = this->merge(split_line, ' ');
-        this->add_to_book(new_line, buy_book);
+        this->add_to_book(new_line, book_main);
         }
       return fulfilled;
     }
@@ -260,6 +267,7 @@ public:
       vlist_t split_line = this->split(line, ' ');
       std::string fulfilled_symbol;
       fulfilled_symbol = 'F';
+      sub_book_t buy_book = book_main[split_line[SYMBOL]].first;
       sub_book_t::const_reverse_iterator buy_iterator = buy_book.rbegin();
       std::map<int, std::string> orders;
       double price = std::stod(split_line[PX]);
@@ -276,19 +284,19 @@ public:
             sell_quantity = 0;
             split_order[QTY] = std::to_string(buy_quantity);
             order = this->merge(split_order, ' ');
-            update_in_book(order, buy_book);
+            update_in_book(order, book_main);
             fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_line[PX]);
             fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_line[PX]);
             break;
           } else if (sell_quantity==buy_quantity) {
             sell_quantity = 0;
-            this->delete_from_book(order,buy_book);
+            this->delete_from_book(order,book_main);
             fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_line[PX]);
             fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_line[PX]);
             break;
           } else {
             sell_quantity = sell_quantity - buy_quantity;
-            this->delete_from_book(order,buy_book);
+            this->delete_from_book(order,book_main);
             fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_order[QTY]+" "+split_line[PX]);
             fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_order[QTY]+" "+split_line[PX]);
           }
@@ -298,12 +306,12 @@ public:
       if (sell_quantity) {
         split_line[QTY] = std::to_string(sell_quantity);
         std::string new_line = this->merge(split_line, ' ');
-        this->add_to_book(new_line, sell_book);
+        this->add_to_book(new_line, book_main);
         }
       return fulfilled;
     }
     
-    void add_to_book (const std::string& line, sub_book_t& book){
+    void add_to_sub_book (const std::string& line, sub_book_t& book){
       vlist_t split_line = this->split(line, ' ');
       double price = std::stod(split_line[PX]);
       int order_id = std::stoi(split_line[OID]);
@@ -318,31 +326,74 @@ public:
       }
     }
 
-    void delete_from_book (const std::string& line, sub_book_t& book){
-      vlist_t split_line = this->split(line, ' ');
-      int order_id = std::stoi(split_line[OID]);
-      std::map<int, std::string> orders;
-      // add error if oid not found
-      for (sub_book_t::const_iterator i = book.begin(); i != book.end(); i++){
-        orders = i->second;
-        orders.erase(order_id);
-        book[i->first] = orders;
+    void add_to_book (const std::string& line, book_t& book){
+      vlist_t split_line = this->split(line, ' ');    
+      if (book.find(split_line[SYMBOL]) == book.end()){
+        sub_book_t sub_book;
+        book[split_line[SYMBOL]] = std::make_pair(sub_book,sub_book);
+        switch (split_line[SIDE][0]){
+          case 'B':
+            this->add_to_sub_book(line, book[split_line[SYMBOL]].first);
+            break;
+          case 'S':
+            this->add_to_sub_book(line, book[split_line[SYMBOL]].second);
+            break;
+        }
+      } else {
+        switch (split_line[SIDE][0]){
+          case 'B':
+            this->add_to_sub_book(line, book[split_line[SYMBOL]].first);
+            break;
+          case 'S':
+            this->add_to_sub_book(line, book[split_line[SYMBOL]].second);
+            break;
+        }
       }
     }
 
-    void update_in_book (const std::string& line, sub_book_t& book){
+    void delete_from_book (const std::string& line, book_t& book){
       vlist_t split_line = this->split(line, ' ');
       int order_id = std::stoi(split_line[OID]);
+      std::string order = OIDs[order_id];
+      vlist_t split_order = this->split(order, ' ');
+      double price = std::stod(split_order[PX]);
       std::map<int, std::string> orders;
-      // add error if oid not found
-      for (sub_book_t::const_iterator i = book.begin(); i != book.end(); i++){
-        orders = i->second;
-        orders[order_id] = line;
-        book[i->first] = orders;
+      switch (split_order[SIDE][0]){
+        case 'B':
+          orders = book[split_order[SYMBOL]].first[price];
+          orders.erase(order_id);
+          book[split_order[SYMBOL]].first[price] = orders;
+          break;
+        case 'S':
+          orders = book[split_order[SYMBOL]].second[price];
+          orders.erase(order_id);
+          book[split_order[SYMBOL]].second[price] = orders;
+          break;
       }
     }
 
-    results_t print_all_sorted (){
+    void update_in_book (const std::string& line, book_t& book){
+      vlist_t split_line = this->split(line, ' ');
+      int order_id = std::stoi(split_line[OID]);
+      std::string order = OIDs[order_id];
+      vlist_t split_order = this->split(order, ' ');
+      double price = std::stod(split_order[PX]);
+      std::map<int, std::string> orders;
+      switch (split_order[SIDE][0]){
+        case 'B':
+          orders = book[split_order[SYMBOL]].first[price];
+          orders[order_id] = line;
+          book[split_order[SYMBOL]].first[price] = orders;
+          break;
+        case 'S':
+          orders = book[split_order[SYMBOL]].second[price];
+          orders[order_id] = line;
+          book[split_order[SYMBOL]].second[price] = orders;
+          break;
+      }
+    }
+
+    results_t print_all_sorted (sub_book_t buy_book, sub_book_t sell_book){
       sub_book_t::const_iterator buy_iterator = buy_book.begin();
       sub_book_t::const_iterator sell_iterator = sell_book.begin();
       results_t all_sorted;
@@ -396,8 +447,7 @@ public:
       return line;
     }
 private:
-    sub_book_t buy_book;
-    sub_book_t sell_book;
+    book_t book_main;
     std::string error_symbol;
     std::unordered_map<int, std::string> OIDs;
 };
