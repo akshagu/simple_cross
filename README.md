@@ -65,3 +65,9 @@ Conditions/Assumptions:
 	All orders are standard limit orders (a limit order means the order remains in the book until it is either canceled, or fully filled by order(s) for its same symbol on the opposite side with an equal or better price).
 	Orders should be selected for crossing using price-time (FIFO) priority
 	Orders for different symbols should not cross (i.e. the book must support multiple symbols)
+	
+Design Choices:
+	The design choices were all geared towards increasing effeciency of crossing events. For this reason the following data structures and algorithms were chosen:
+		The data was divided into two structures to increase speed for accessing price ordered list and also for deleting orders quickly.
+		There is an overarching unordered map structure that uses the symbol as the key. Under this are two more oredred maps (chosen for its self sorting/balancing behavior) that represent a buy and a sell book for each symbol (ticker). Each of these is ordered internally based on price to quickly access lowest prices for crossing.
+		Another unordered map is maintained to quickly associate order ID and the location of the order in the main nest map. This helps in quickly detecting duplicates and deleting entries.
