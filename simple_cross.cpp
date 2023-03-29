@@ -157,7 +157,6 @@ public:
     results_t action(const std::string& line) {
       results_t output, print_book;
       vlist_t split_line = this->split(line, ' ');
-      //handle error here
       switch (split_line[ACTION][0]){
         case 'O':
           output = this->cross_order(line);
@@ -287,24 +286,11 @@ public:
         }
       return fulfilled;
     }
-
-    void process_order (const std::string& line){
-      vlist_t split_line = this->split(line, ' ');
-      switch (split_line[SIDE][0]){
-        case 'B':
-          this->add_to_book(line, buy_book);
-          break;
-        case 'S':
-          this->add_to_book(line, sell_book);
-          break;
-      }
-    }
     
     void add_to_book (const std::string& line, book_t& book){
       vlist_t split_line = this->split(line, ' ');
       double price = std::stod(split_line[PX]);
       int order_id = std::stoi(split_line[OID]);
-      //add duplicate error handling
       if (book.find(price) == book.end()){
         std::map<int, std::string> orders;
         orders[order_id] = line;
