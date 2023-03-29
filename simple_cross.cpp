@@ -145,7 +145,25 @@ typedef std::map<double, std::map<int, std::string> > book_t;
 class SimpleCross
 {
 public:
-    results_t action(const std::string& line) { return(results_t()); }
+    results_t action(const std::string& line) {
+      vlist_t parsed_order = this->split(line, ' ');
+      switch (parsed_order[0][0]){
+        case 'O':
+          this->process_order(line);
+          break;
+        case 'P':
+          break;
+        case 'X':
+          break;
+      }
+      return results_t();
+    }
+
+    void process_order (const std::string& line){
+      this->add_to_book(line, buy_book);
+      auto it = buy_book.begin();
+      std::cout << it->first << std::endl;
+    }
     
     void add_to_book (const std::string& line, book_t& book){
       vlist_t parsed_order = this->split(line, ' ');
