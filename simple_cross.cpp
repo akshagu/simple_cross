@@ -138,6 +138,7 @@ F 10008 IBM 3 102.00000
 #include <map>
 #include <vector>
 #include <unordered_map>
+#include <typeinfo>
 
 typedef std::list<std::string> results_t;
 typedef std::vector<std::string> vlist_t;
@@ -205,10 +206,24 @@ public:
     std::pair<bool, results_t> check_malformed_input (const vlist_t& split_line) {
       results_t output;
       bool error_flag = false;
-      if (split_line[ACTION].length()>1) {
+      if (split_line[ACTION].length()!=1) {
         error_symbol = 'E';
         error_flag = true;
         output.push_back(error_symbol+" "+"Malformed action input");
+      } else if (split_line[ACTION][0] == 'O'){
+        if (typeid(split_line[SYMBOL]) != typeid(std::string)){
+          error_symbol = 'E';
+          error_flag = true;
+          output.push_back(error_symbol+" "+"Malformed symbol input");
+        } else if (split_line[SYMBOL].length()>8){
+          error_symbol = 'E';
+          error_flag = true;
+          output.push_back(error_symbol+" "+"symbol input too long");
+        } else if (split_line[SIDE].length()!=1){
+          error_symbol = 'E';
+          error_flag = true;
+          output.push_back(error_symbol+" "+"Malformed side input");
+        }
       }
       return std::make_pair(error_flag, output);
     }
