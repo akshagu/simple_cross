@@ -163,6 +163,8 @@ public:
         case 'P':
           break;
         case 'X':
+          this->delete_from_book(split_line, buy_book);
+          this->delete_from_book(split_line, sell_book);
           break;
       }
       return results_t();
@@ -192,6 +194,17 @@ public:
         std::map<int, vlist_t> orders = book[price];
         orders[order_id] = split_line;
         book[price] = orders;
+      }
+    }
+
+    void delete_from_book (const vlist_t& split_line, book_t& book){
+      int order_id = std::stoi(split_line[OID]);
+      std::map<int, vlist_t> orders;
+      // add error if oid not found
+      for (book_t::const_iterator i = book.begin(); i != book.end(); i++){
+        orders = i->second;
+        orders.erase(order_id);
+        book[i->first] = orders;
       }
     }
 
