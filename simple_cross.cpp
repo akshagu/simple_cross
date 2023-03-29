@@ -137,6 +137,7 @@ F 10008 IBM 3 102.00000
 #include <sstream>
 #include <map>
 #include <vector>
+#include <unordered_set>
 
 typedef std::list<std::string> results_t;
 typedef std::vector<std::string> vlist_t;
@@ -157,9 +158,18 @@ public:
     results_t action(const std::string& line) {
       results_t output, print_book;
       vlist_t split_line = this->split(line, ' ');
+      int order_id;
+      std::pair<std::unordered_set<int>::iterator,bool> insrt;
       switch (split_line[ACTION][0]){
         case 'O':
-          output = this->cross_order(line);
+          order_id = std::stoi(split_line[OID]);
+          insrt = OIDs.insert(order_id);
+          if(insrt.second) {
+            output = this->cross_order(line);
+          } else {
+            error_symbol = 'E';
+            output.push_back(error_symbol+" "+split_line[OID]+" "+"Duplicate order id");
+          }
           break;
         case 'P':
           print_book = this->print_all_sorted();
@@ -389,6 +399,7 @@ private:
     book_t buy_book;
     book_t sell_book;
     std::string error_symbol;
+    std::unordered_set<int> OIDs;
 };
 
 int main(int argc, char **argv)
