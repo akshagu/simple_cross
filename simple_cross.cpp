@@ -229,6 +229,8 @@ public:
         append_orders_for_key(orders, orders_strings);
         for (std::string& order : orders_strings){
           vlist_t split_order = this->split(order, ' ');
+          std::stringstream price_stream;
+          price_stream << std::fixed << std::setprecision(5) << std::stod(split_order[PX]);
           int sell_quantity = std::stoi(split_order[QTY]);
           if (sell_quantity>buy_quantity){
             sell_quantity = sell_quantity - buy_quantity;
@@ -236,20 +238,20 @@ public:
             split_order[QTY] = std::to_string(sell_quantity);
             order = this->merge(split_order, ' ');
             update_in_book(order, book_main);
-            fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_order[PX]);
-            fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_order[PX]);
+            fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+price_stream.str());
+            fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+price_stream.str());
             break;
           } else if (sell_quantity==buy_quantity) {
             buy_quantity = 0;
             this->delete_from_book(order,book_main);
-            fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_order[PX]);
-            fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_order[PX]);
+            fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+price_stream.str());
+            fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+price_stream.str());
             break;
           } else {
             buy_quantity = buy_quantity - sell_quantity;
             this->delete_from_book(order,book_main);
-            fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_order[QTY]+" "+split_order[PX]);
-            fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_order[QTY]+" "+split_order[PX]);
+            fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_order[QTY]+" "+price_stream.str());
+            fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_order[QTY]+" "+price_stream.str());
           }
         }
         sell_iterator++;
@@ -278,6 +280,9 @@ public:
         append_orders_for_key(orders, orders_strings);
         for (std::string& order : orders_strings){
           vlist_t split_order = this->split(order, ' ');
+          std::stringstream price_stream;
+          price_stream.str("");
+          price_stream << std::fixed << std::setprecision(5) << std::stod(split_line[PX]);
           int buy_quantity = std::stoi(split_order[QTY]);
           if (buy_quantity>sell_quantity){
             buy_quantity = buy_quantity - sell_quantity;
@@ -285,20 +290,20 @@ public:
             split_order[QTY] = std::to_string(buy_quantity);
             order = this->merge(split_order, ' ');
             update_in_book(order, book_main);
-            fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_line[PX]);
-            fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_line[PX]);
+            fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+price_stream.str());
+            fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+price_stream.str());
             break;
           } else if (sell_quantity==buy_quantity) {
             sell_quantity = 0;
             this->delete_from_book(order,book_main);
-            fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_line[PX]);
-            fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+split_line[PX]);
+            fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+price_stream.str());
+            fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_line[QTY]+" "+price_stream.str());
             break;
           } else {
             sell_quantity = sell_quantity - buy_quantity;
             this->delete_from_book(order,book_main);
-            fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_order[QTY]+" "+split_line[PX]);
-            fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_order[QTY]+" "+split_line[PX]);
+            fulfilled.push_back(fulfilled_symbol+" "+split_line[OID]+" "+split_line[SYMBOL]+" "+split_order[QTY]+" "+price_stream.str());
+            fulfilled.push_back(fulfilled_symbol+" "+split_order[OID]+" "+split_line[SYMBOL]+" "+split_order[QTY]+" "+price_stream.str());
           }
         }
         buy_iterator++;
@@ -440,10 +445,16 @@ public:
     }
 
     std::string merge(const vlist_t& split_line, char delimiter){
+      vlist_t _split_line = split_line;
       std::string line;
-      for (std::string chunk : split_line){
+      std::stringstream price_stream;
+      price_stream.str("");
+      price_stream << std::fixed << std::setprecision(5) << std::stod(split_line[PX]);
+      _split_line.pop_back();
+      for (std::string chunk : _split_line){
         line = line + chunk + delimiter;
       }
+      line = line + price_stream.str();
       return line;
     }
 private:
