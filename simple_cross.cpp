@@ -173,6 +173,45 @@ public:
       return this->print_all_sorted();
     }
 
+    results_t buy_cross(const std::string& line){
+      vlist_t split_line = this->split(line, ' ');
+      book_t::const_iterator sell_iterator = sell_book.begin();
+      std::map<int, std::string> orders;
+      double price = std::stod(split_line[PX]);
+      int buy_quantity = std::stoi(split_line[QTY]);
+      while (sell_iterator->first<=price && buy_quantity>0 && sell_iterator != sell_book.end()){
+        results_t orders_strings;
+        orders = sell_iterator->second;
+        append_orders_for_key(orders, orders_strings);
+        for (std::string& order : orders_strings){
+          vlist_t split_order = this->split(order, ' ');
+          int sell_quantity = std::stoi(split_order[QTY]);
+          if (sell_quantity>buy_quantity){
+            buy_quantity = 0;
+            sell_quantity = sell_quantity - buy_quantity;
+            split_order[QTY] = std::to_string(sell_quantity);
+            order = this->merge(split_order, ' ');
+            update_in_book(order, sell_book);
+            break;
+          } else if (sell_quantity==buy_quantity) {
+            buy_quantity = 0;
+            this->delete_from_book(order,sell_book);
+            break;
+          } else {
+            buy_quantity = buy_quantity - sell_quantity;
+            this->delete_from_book(order,sell_book);
+          }
+        }
+        sell_iterator++;
+      }
+      if (buy_quantity) {
+        split_line[QTY] = std::to_string(buy_quantity);
+        std::string new_line = this->merge(split_line, ' ');
+        this->add_to_book(new_line, buy_book);
+        }
+      return results_t();
+    }
+
     void process_order (const std::string& line){
       vlist_t split_line = this->split(line, ' ');
       switch (split_line[SIDE][0]){
