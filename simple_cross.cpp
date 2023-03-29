@@ -136,19 +136,20 @@ F 10008 IBM 3 102.00000
 #include <list>
 #include <sstream>
 #include <map>
+#include <vector>
 
 typedef std::list<std::string> results_t;
+typedef std::vector<std::string> vlist_t;
 
 class SimpleCross
 {
 public:
     results_t action(const std::string& line) { return(results_t()); }
     
-    void add_to_book (const std::string& line, std::map<double, results_t>& book){
-      results_t temp = this->split(line, ' ');
-      results_t::const_iterator it = temp.begin();
-      std::advance(it,5);
-      double price = std::stod(*it);
+    void add_to_book (const std::string& line, book_t& book){
+      vlist_t parsed_order = this->split(line, ' ');
+      double price = std::stod(parsed_order[5]);
+      double OID = std::stoi(parsed_order[1]);
       if (book.find(price) == book.end()){
         results_t order_list;
         order_list.push_back(line);
@@ -158,10 +159,10 @@ public:
       }
     }
 
-    results_t split(std::string line, char delimiter){
+    vlist_t split(std::string line, char delimiter){
       std::string temp_holder;
       std::stringstream ss(line);
-      results_t string_array;
+      vlist_t string_array;
       while (getline(ss, temp_holder, delimiter)){
         string_array.push_back(temp_holder);
       }
